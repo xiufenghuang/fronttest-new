@@ -10,7 +10,7 @@
   <el-form-item label="文件URL" prop="fileUrl">
 	<!-- <el-form-item label="文件URL"> -->
       <!-- <el-input v-model="dataForm.fileUrl" placeholder="文件URL"></el-input> -->
-	  <ma-upload-file :fileType="['application/octet-stream']" v-model:modelValueFileUrl="dataForm.fileUrl" v-model:modelValueFileSize="dataForm.fileSize"></ma-upload-file>
+	  <ma-upload-file :fileType="['application/octet-stream']" v-model:modelValueFileUrl="dataForm.fileUrl" v-model:modelValueFileSize="dataForm.fileSize"  :requiredWidth="null" :requiredHeight="null"></ma-upload-file>
   </el-form-item>
   </el-form>
 		<template #footer>

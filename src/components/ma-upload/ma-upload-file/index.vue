@@ -1,11 +1,11 @@
 <template>
-	<el-upload v-model:file-list="fileList" style="width: 100%" :action="uploadUrl"
-		:headers="{ Authorization: cache.getToken() }" multiple :limit="limit" :before-upload="handleBeforeUpload"
-		:on-exceed="handleExceed" :on-preview="handlePreview" :on-remove="handleRemove" :on-success="handleSuccess"
-		:disabled="disabled">
-		<slot />
-		<el-button icon="Upload" plain> 点击上传</el-button>
-	</el-upload>
+  <el-upload v-model:file-list="fileList" style="width: 100%" :action="uploadUrl"
+    :headers="{ Authorization: cache.getToken() }" multiple :limit="limit" :before-upload="handleBeforeUpload"
+    :on-exceed="handleExceed" :on-preview="handlePreview" :on-remove="handleRemove" :on-success="handleSuccess"
+    :disabled="disabled">
+    <slot />
+    <el-button icon="Upload" plain> 点击上传</el-button>
+  </el-upload>
 </template>
 
 <script setup lang="ts" name="MaUploadFile">
@@ -46,11 +46,11 @@ const props = defineProps({
   },
   requiredWidth: {
     type: Number,
-    default: false
+    default: null // 修改默认值为 null
   },
   requiredHeight: {
     type: Number,
-    default: false
+    default: null // 修改默认值为 null
   },
 })
 
@@ -98,19 +98,30 @@ const handleSuccess: UploadProps['onSuccess'] = (response, uploadFile) => {
     return false
   }
 
-  
   const newUrl = response.data.url
   const currentUrls = props.modelValueFileUrl ? props.modelValueFileUrl.split(',') : []
   currentUrls.push(newUrl)
   emit('update:modelValueFileUrl', currentUrls.join(','))
   emit('update:modelValueFileSize', response.data.size)
-
 }
 
 const handleBeforeUpload: UploadProps['beforeUpload'] = async(rawFile)  => {
   const imgSize = rawFile.size / 1024 / 1024 < props.fileSize
   const imgType = props.fileType.includes(rawFile.type)
-  const isValidSize =await checkImageDimensions(rawFile, props.requiredWidth,props.requiredHeight);
+  
+  // 只有当 requiredWidth 和 requiredHeight 都有值时才检查图片尺寸
+  let isValidSize = true
+  if (props.requiredWidth && props.requiredHeight) {
+    isValidSize = await checkImageDimensions(rawFile, props.requiredWidth, props.requiredHeight)
+    if (!isValidSize) {
+      ElNotification({
+        title: '温馨提示',
+        message: `上传图片的尺寸不符合要求！必须为：${props.requiredWidth}x${props.requiredHeight}`,
+        type: 'warning'
+      })
+    }
+  }
+
   if (!imgType) {
     ElNotification({
       title: '温馨提示',
@@ -128,18 +139,7 @@ const handleBeforeUpload: UploadProps['beforeUpload'] = async(rawFile)  => {
     }, 0)
   }
 
-
-  if (!isValidSize) {
-    ElNotification({
-      title: '温馨提示',
-      message: `上传图片的尺寸不符合要求！必须为：${props.requiredWidth}x${props.requiredHeight}`,
-      type: 'warning'
-    });
-    return false;
-  }
-
-  return imgType && imgSize && isValidSize;
-
+  return imgType && imgSize && isValidSize
 }
 
 const handleExceed = () => {
@@ -152,28 +152,25 @@ const handleExceed = () => {
 
 const checkImageDimensions = (file: File, requiredWidth: number, requiredHeight: number): Promise<boolean> => {
   return new Promise((resolve) => {
-    const img = new Image();
-    const objectURL = URL.createObjectURL(file);
+    const img = new Image()
+    const objectURL = URL.createObjectURL(file)
 
     img.onload = () => {
       // 判断图片的宽度和高度是否与要求的宽度和高度匹配
       if (img.width === requiredWidth && img.height === requiredHeight) {
-        resolve(true);
+        resolve(true)
       } else {
-        resolve(false);
+        resolve(false)
       }
-      URL.revokeObjectURL(objectURL);  // 清理URL对象
-    };
+      URL.revokeObjectURL(objectURL)  // 清理URL对象
+    }
 
     img.onerror = () => {
-      resolve(false);
-      URL.revokeObjectURL(objectURL);  // 清理URL对象
-    };
+      resolve(false)
+      URL.revokeObjectURL(objectURL)  // 清理URL对象
+    }
 
-    img.src = objectURL;
-  });
-};
-
-
-
+    img.src = objectURL
+  })
+}
 </script>
