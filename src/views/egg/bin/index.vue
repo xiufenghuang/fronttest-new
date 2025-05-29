@@ -35,7 +35,11 @@
 			<el-table-column prop="id" label="文件id" header-align="center" align="center"></el-table-column>
 			<el-table-column prop="fileUrl" label="文件URL" header-align="center" align="center"></el-table-column>
 			<el-table-column prop="fileSize" label="文件大小" header-align="center" align="center"></el-table-column>
-			<ma-dict-table prop="fileType" label="文件类型" dict-type="file_bin_type"></ma-dict-table>
+			<el-table-column prop="fileType" label="文件类型" header-align="center" align="center">
+				<template #default="scope">
+					<ma-dict-label :dict-type="'file_bin_type'" :dict-value="scope.row.fileType" />
+				</template>
+			</el-table-column>
 			<el-table-column prop="fileVersion" label="文件版本" header-align="center" align="center"></el-table-column>
 			<el-table-column prop="createTime" label="创建时间" header-align="center" align="center"></el-table-column>
 			<el-table-column label="操作" fixed="right" header-align="center" align="center" width="150">
@@ -71,6 +75,7 @@
 	const state: IHooksOptions = reactive({
 	dataListUrl: '/file/bin/page',
 	deleteUrl: '/file/bin',
+	fileType: '',
 	queryForm: {
 		id: '', 
 		fileType: '', 
